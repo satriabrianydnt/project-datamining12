@@ -64,7 +64,7 @@ def proses():
     # Narasi hasil
     deskripsi = []
     for _, row in rules_display.iterrows():
-        desc = f"Jika membeli {row['antecedents']}, maka kemungkinan membeli {row['consequents']} adalah {row['confidence'] * 100:.2f}%."
+        desc = f"Jika membeli {row['antecedents']}, maka kemungkinan membeli {row['consequents']} adalah {row['confidence'] * 100:.2f}%. (Lift: {row['lift']:.2f})."
         deskripsi.append(desc)
 
     return render_template('result.html', rules=rules_display.to_dict(orient='records'), deskripsi=deskripsi, file='hasil_rules.csv')
