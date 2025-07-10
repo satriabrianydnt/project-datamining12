@@ -29,16 +29,20 @@ def proses():
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(filepath)
 
+    # Load dataset
     dataset = pd.read_csv(filepath)
 
-    basket = (dataset.groupby(['Transaksi_ID', 'Item'])['Item']
-              .count().unstack().reset_index().fillna(0).set_index('Transaksi_ID'))
+    # Filter 'NONE'
+    dataset = dataset[dataset['Item'] != 'NONE']
 
-    def encode_units(x):
-        return 0 if x <= 0 else 1
+    # Buat pivot transaksi
+    basket = (dataset.groupby(['Transaction', 'Item'])['Item']
+              .count().unstack().reset_index().fillna(0).set_index('Transaction'))
 
-    basket_sets = basket.applymap(encode_units)
+    # Ubah ke binary
+    basket_sets = basket.applymap(lambda x: 1 if x > 0 else 0)
 
+    # Apriori
     frequent_itemsets = apriori(basket_sets, min_support=min_support, use_colnames=True)
 
     if frequent_itemsets.empty:
@@ -49,17 +53,18 @@ def proses():
     if rules.empty:
         return "Tidak ada aturan yang memenuhi minimum confidence."
 
+    # Format hasil
     rules_display = rules[['antecedents', 'consequents', 'support', 'confidence', 'lift']]
-
     rules_display['antecedents'] = rules_display['antecedents'].apply(lambda x: ', '.join(list(x)))
     rules_display['consequents'] = rules_display['consequents'].apply(lambda x: ', '.join(list(x)))
 
     output_path = os.path.join(app.config['UPLOAD_FOLDER'], 'hasil_rules.csv')
     rules_display.to_csv(output_path, index=False)
 
+    # Narasi hasil
     deskripsi = []
     for _, row in rules_display.iterrows():
-        desc = f"Jika membeli {row['antecedents']}, maka kemungkinan membeli {row['consequents']} adalah {row['confidence'] * 100:.2f}% (Lift: {row['lift']:.2f})."
+        desc = f"Jika membeli {row['antecedents']}, maka kemungkinan membeli {row['consequents']} adalah {row['confidence'] * 100:.2f}%."
         deskripsi.append(desc)
 
     return render_template('result.html', rules=rules_display.to_dict(orient='records'), deskripsi=deskripsi, file='hasil_rules.csv')

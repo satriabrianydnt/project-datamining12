@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Hasil Apriori - Data Mining App</title>
+    <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen">
@@ -34,7 +36,7 @@
         <div class="max-w-7xl mx-auto p-8 bg-white rounded-2xl shadow-2xl border border-blue-100">
             <h2 class="text-3xl font-bold mb-6 text-center text-blue-800">Hasil Association Rules</h2>
             <div class="flex justify-center space-x-4 mb-6">
-                <a href="/"
+                <a href="/upload"
                     class="bg-gray-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-700 transition transform hover:scale-105 shadow">Kembali</a>
                 <a href="/download/{{ file }}"
                     class="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition transform hover:scale-105 shadow">Download
@@ -63,6 +65,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <h3 class="text-xl font-semibold mt-8 text-center">Visualisasi Confidence Rules</h3>
+                <canvas id="chart" class="mt-4"></canvas>
+
                 <div class="mt-12">
                     <h3 class="text-2xl font-bold mb-4 text-blue-800">Penjelasan Aturan:</h3>
                     <ul class="list-disc pl-6 space-y-2 text-blue-900">
@@ -78,8 +84,43 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-blue-100 py-4 mt-12">
-        
+        <div class="max-w-7xl mx-auto text-center text-blue-700 text-sm">
+            &copy; 2024 Data Mining App. All rights reserved.
+        </div>
     </footer>
+
+    <script>
+    const labels = JSON.parse('{{ rules | tojson | safe }}');
+    const data = {
+        labels: labels.map(r => r.antecedents + ' → ' + r.consequents),
+        datasets: [{
+            label: 'Confidence',
+            data: labels.map(r => r.confidence),
+            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+            borderRadius: 4,
+        }]
+    };
+
+    new Chart(document.getElementById('chart'), {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Confidence dari Setiap Aturan Asosiasi' }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 1,
+                    title: { display: true, text: 'Confidence' }
+                }
+            }
+        }
+    });
+</script>
+
 </body>
 
 </html>
