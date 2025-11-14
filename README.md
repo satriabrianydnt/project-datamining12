@@ -21,7 +21,7 @@ Analisis pola pembelian konsumen di toko roti menggunakan **algoritma Apriori**.
 
 ## 🚀 Instalasi & Menjalankan Aplikasi
 
-Ikuti langkah-langkah di bawah ini untuk menjalankan proyek secara lokal:
+Ikuti langkah-langkah di bawah ini untuk tutorial cara menjalankan:
 
 ### 1. Clone Repository
 ```bash
